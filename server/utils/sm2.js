@@ -30,7 +30,7 @@ function sm2(quality, repetitions, easeFactor, interval) {
     }
     newRepetitions = repetitions + 1;
   } else {
-    // Incorrect response — reset
+    // Incorrect response: reset
     newRepetitions = 0;
     newInterval = 1;
   }

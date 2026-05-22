@@ -1,18 +1,29 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const Card = require('../models/Card');
 const Deck = require('../models/Deck');
 const { sm2 } = require('../utils/sm2');
 
-// Helper: sync deck's cardCount
+function isValidId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+function pickDefined(values) {
+  return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined));
+}
+
 async function syncDeckCount(deckId) {
   const count = await Card.countDocuments({ deckId });
   await Deck.findByIdAndUpdate(deckId, { cardCount: count });
 }
 
-// GET all cards in a deck
 router.get('/deck/:deckId', async (req, res) => {
   try {
+    if (!isValidId(req.params.deckId)) {
+      return res.status(400).json({ error: 'Invalid deck id' });
+    }
+
     const cards = await Card.find({ deckId: req.params.deckId }).sort({ createdAt: -1 });
     res.json(cards);
   } catch (err) {
@@ -20,9 +31,12 @@ router.get('/deck/:deckId', async (req, res) => {
   }
 });
 
-// GET cards due for review in a deck
 router.get('/deck/:deckId/due', async (req, res) => {
   try {
+    if (!isValidId(req.params.deckId)) {
+      return res.status(400).json({ error: 'Invalid deck id' });
+    }
+
     const now = new Date();
     const dueCards = await Card.find({
       deckId: req.params.deckId,
@@ -35,9 +49,12 @@ router.get('/deck/:deckId/due', async (req, res) => {
   }
 });
 
-// GET single card
 router.get('/:id', async (req, res) => {
   try {
+    if (!isValidId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid card id' });
+    }
+
     const card = await Card.findById(req.params.id);
     if (!card) return res.status(404).json({ error: 'Card not found' });
     res.json(card);
@@ -46,12 +63,14 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST create card
 router.post('/', async (req, res) => {
   try {
     const { deckId, front, back } = req.body;
 
-    // Validate deck exists
+    if (!isValidId(deckId)) {
+      return res.status(400).json({ error: 'Invalid deck id' });
+    }
+
     const deck = await Deck.findById(deckId);
     if (!deck) return res.status(404).json({ error: 'Deck not found' });
 
@@ -67,13 +86,16 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT update card content
 router.put('/:id', async (req, res) => {
   try {
+    if (!isValidId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid card id' });
+    }
+
     const { front, back } = req.body;
     const card = await Card.findByIdAndUpdate(
       req.params.id,
-      { front, back },
+      pickDefined({ front, back }),
       { new: true, runValidators: true }
     );
     if (!card) return res.status(404).json({ error: 'Card not found' });
@@ -86,9 +108,12 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE card
 router.delete('/:id', async (req, res) => {
   try {
+    if (!isValidId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid card id' });
+    }
+
     const card = await Card.findByIdAndDelete(req.params.id);
     if (!card) return res.status(404).json({ error: 'Card not found' });
     await syncDeckCount(card.deckId);
@@ -98,33 +123,28 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST review a card (spaced repetition)
-// Body: { quality: 0-5 }
 router.post('/:id/review', async (req, res) => {
   try {
-    const { quality } = req.body;
+    if (!isValidId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid card id' });
+    }
 
-    // Edge case: quality must be a number between 0 and 5
-    if (quality === undefined || quality === null || isNaN(quality)) {
-      return res.status(400).json({ error: 'quality must be a number 0–5' });
+    const rating = Number(req.body.quality);
+    if (!Number.isFinite(rating) || rating < 0 || rating > 5) {
+      return res.status(400).json({ error: 'quality must be a number from 0 to 5' });
     }
 
     const card = await Card.findById(req.params.id);
     if (!card) return res.status(404).json({ error: 'Card not found' });
 
-    const result = sm2(
-      Number(quality),
-      card.repetitions,
-      card.easeFactor,
-      card.interval
-    );
+    const result = sm2(rating, card.repetitions, card.easeFactor, card.interval);
 
     const updated = await Card.findByIdAndUpdate(
       req.params.id,
       {
         ...result,
         lastReviewedAt: new Date(),
-        lastQuality: Number(quality),
+        lastQuality: rating,
       },
       { new: true }
     );
