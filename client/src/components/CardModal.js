@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 
 export default function CardModal({ title, initial = {}, onSave, onClose }) {
   const [front, setFront] = useState(initial.front || '');
@@ -17,7 +18,9 @@ export default function CardModal({ title, initial = {}, onSave, onClose }) {
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <span className="modal-title">{title}</span>
-          <button className="btn btn-icon" onClick={onClose}>✕</button>
+          <button className="btn btn-icon" aria-label="Close" onClick={onClose}>
+            <X size={16} aria-hidden="true" />
+          </button>
         </div>
 
         <div className="form-group">
@@ -52,7 +55,7 @@ export default function CardModal({ title, initial = {}, onSave, onClose }) {
             onClick={handleSave}
             disabled={!front.trim() || !back.trim() || saving}
           >
-            {saving ? 'Saving…' : 'Save Card'}
+            {saving ? 'Saving...' : 'Save Card'}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 
 export default function ConfirmModal({ message, onConfirm, onClose }) {
   return (
@@ -6,7 +7,9 @@ export default function ConfirmModal({ message, onConfirm, onClose }) {
       <div className="modal" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <span className="modal-title">Confirm</span>
-          <button className="btn btn-icon" onClick={onClose}>✕</button>
+          <button className="btn btn-icon" aria-label="Close" onClick={onClose}>
+            <X size={16} aria-hidden="true" />
+          </button>
         </div>
         <p style={{ color: 'var(--cream-dim)', marginBottom: 0 }}>{message}</p>
         <div className="modal-actions">

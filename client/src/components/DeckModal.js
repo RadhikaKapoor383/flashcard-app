@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 
 export default function DeckModal({ title, initial = {}, colors, onSave, onClose }) {
   const [name, setName] = useState(initial.name || '');
@@ -18,7 +19,9 @@ export default function DeckModal({ title, initial = {}, colors, onSave, onClose
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <span className="modal-title">{title}</span>
-          <button className="btn btn-icon" onClick={onClose}>✕</button>
+          <button className="btn btn-icon" aria-label="Close" onClick={onClose}>
+            <X size={16} aria-hidden="true" />
+          </button>
         </div>
 
         <div className="form-group">
@@ -68,7 +71,7 @@ export default function DeckModal({ title, initial = {}, colors, onSave, onClose
             onClick={handleSave}
             disabled={!name.trim() || saving}
           >
-            {saving ? 'Saving…' : 'Save'}
+            {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>

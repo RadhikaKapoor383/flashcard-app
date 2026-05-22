@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BookOpen, CheckCircle2, Clock3, CreditCard, Edit3, Plus, Trash2 } from 'lucide-react';
 import { getDecks, createDeck, updateDeck, deleteDeck } from '../api';
 import { useToast } from '../hooks/useToast';
 import DeckModal from '../components/DeckModal';
@@ -73,20 +74,22 @@ export default function DecksPage() {
           <div className="page-header-left">
             <h1>My Decks</h1>
             <p style={{ marginTop: 6 }}>
-              {decks.length} deck{decks.length !== 1 ? 's' : ''} · spaced repetition
+              {decks.length} deck{decks.length !== 1 ? 's' : ''} - spaced repetition
             </p>
           </div>
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-            + New Deck
+            <Plus size={16} aria-hidden="true" />
+            New Deck
           </button>
         </div>
 
         {decks.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📚</div>
+            <div className="empty-state-icon"><BookOpen size={52} strokeWidth={1.5} aria-hidden="true" /></div>
             <h3>No decks yet</h3>
             <p>Create your first deck to start studying</p>
             <button className="btn btn-primary btn-lg" style={{ marginTop: 20 }} onClick={() => setShowCreate(true)}>
+              <Plus size={18} aria-hidden="true" />
               Create a Deck
             </button>
           </div>
@@ -104,19 +107,29 @@ export default function DecksPage() {
                   <div className="deck-card-desc">{deck.description || 'No description'}</div>
                   <div className="deck-card-meta">
                     <div className="deck-card-count">
-                      <span>🃏</span>
+                      <CreditCard size={14} aria-hidden="true" />
                       <span>{deck.cardCount} card{deck.cardCount !== 1 ? 's' : ''}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       {deck.dueCount > 0 && (
-                        <span className="badge badge-due">⏰ {deck.dueCount} due</span>
+                        <span className="badge badge-due">
+                          <Clock3 size={12} aria-hidden="true" />
+                          {deck.dueCount} due
+                        </span>
                       )}
                       {deck.dueCount === 0 && deck.cardCount > 0 && (
-                        <span className="badge badge-done">✓ All done</span>
+                        <span className="badge badge-done">
+                          <CheckCircle2 size={12} aria-hidden="true" />
+                          All done
+                        </span>
                       )}
                       <div className="deck-card-actions" onClick={e => e.stopPropagation()}>
-                        <button className="btn-icon btn" title="Edit" onClick={() => setEditDeck(deck)}>✎</button>
-                        <button className="btn-icon btn" title="Delete" onClick={() => setDeletingDeck(deck)}>🗑</button>
+                        <button className="btn-icon btn" title="Edit" aria-label="Edit deck" onClick={() => setEditDeck(deck)}>
+                          <Edit3 size={14} aria-hidden="true" />
+                        </button>
+                        <button className="btn-icon btn" title="Delete" aria-label="Delete deck" onClick={() => setDeletingDeck(deck)}>
+                          <Trash2 size={14} aria-hidden="true" />
+                        </button>
                       </div>
                     </div>
                   </div>

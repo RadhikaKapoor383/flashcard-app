@@ -94,6 +94,10 @@ button {
   background: none;
 }
 
+svg {
+  flex-shrink: 0;
+}
+
 input, textarea {
   font-family: var(--font-body);
 }
@@ -215,6 +219,9 @@ input, textarea {
 
 .btn-icon {
   padding: 8px;
+  width: 34px;
+  height: 34px;
+  justify-content: center;
   border-radius: var(--radius-sm);
   line-height: 1;
   background: var(--surface-raised);
@@ -360,7 +367,8 @@ input, textarea {
 }
 
 .empty-state-icon {
-  font-size: 3rem;
+  display: flex;
+  justify-content: center;
   margin-bottom: 16px;
   opacity: 0.4;
 }
@@ -709,7 +717,8 @@ input, textarea {
 }
 
 .review-complete-icon {
-  font-size: 4rem;
+  display: flex;
+  justify-content: center;
   margin-bottom: 20px;
   animation: bounceIn 0.5s var(--ease-bounce);
 }

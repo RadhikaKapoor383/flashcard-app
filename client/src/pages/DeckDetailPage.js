@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { AlertTriangle, ArrowLeft, CheckCircle2, CreditCard, Edit3, Plus, RotateCcw, Trash2, Zap } from 'lucide-react';
 import { getDeck, getCards, getDueCards, createCard, updateCard, deleteCard } from '../api';
 import { useToast } from '../hooks/useToast';
 import CardModal from '../components/CardModal';
@@ -77,7 +78,7 @@ export default function DeckDetailPage() {
   if (!deck) return (
     <div className="page-container">
       <div className="empty-state">
-        <div className="empty-state-icon">❌</div>
+        <div className="empty-state-icon"><AlertTriangle size={52} strokeWidth={1.5} aria-hidden="true" /></div>
         <h3>Deck not found</h3>
         <Link to="/" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-flex' }}>Go Home</Link>
       </div>
@@ -89,7 +90,10 @@ export default function DeckDetailPage() {
       <div className="page-content">
         <div className="page-header">
           <div className="page-header-left">
-            <Link to="/" className="back-link">← All Decks</Link>
+            <Link to="/" className="back-link">
+              <ArrowLeft size={14} aria-hidden="true" />
+              All Decks
+            </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 14, height: 14, borderRadius: 4, background: deck.color, flexShrink: 0 }} />
               <h2 style={{ margin: 0 }}>{deck.name}</h2>
@@ -102,7 +106,8 @@ export default function DeckDetailPage() {
                 className="btn btn-primary"
                 onClick={() => navigate(`/deck/${id}/review`)}
               >
-                ⚡ Study Now ({dueCount} due)
+                <Zap size={16} aria-hidden="true" />
+                Study Now ({dueCount} due)
               </button>
             )}
             {dueCount === 0 && cards.length > 0 && (
@@ -110,16 +115,17 @@ export default function DeckDetailPage() {
                 className="btn btn-ghost"
                 onClick={() => navigate(`/deck/${id}/review`)}
               >
-                🔁 Review All
+                <RotateCcw size={16} aria-hidden="true" />
+                Review All
               </button>
             )}
             <button className="btn btn-ghost" onClick={() => setShowAdd(true)}>
-              + Add Card
+              <Plus size={16} aria-hidden="true" />
+              Add Card
             </button>
           </div>
         </div>
 
-        {/* Stats bar */}
         {cards.length > 0 && (
           <div style={{ display: 'flex', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
             <div className="card" style={{ padding: '12px 20px', flex: 'none' }}>
@@ -139,10 +145,11 @@ export default function DeckDetailPage() {
 
         {cards.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">🃏</div>
+            <div className="empty-state-icon"><CreditCard size={52} strokeWidth={1.5} aria-hidden="true" /></div>
             <h3>No cards yet</h3>
             <p>Add your first card to start studying</p>
             <button className="btn btn-primary btn-lg" style={{ marginTop: 20 }} onClick={() => setShowAdd(true)}>
+              <Plus size={18} aria-hidden="true" />
               Add First Card
             </button>
           </div>
@@ -163,10 +170,16 @@ export default function DeckDetailPage() {
                   {card.nextReviewDate && new Date(card.nextReviewDate) <= new Date() ? (
                     <span className="badge badge-due" style={{ fontSize: 10 }}>Due</span>
                   ) : card.repetitions > 0 ? (
-                    <span className="badge badge-done" style={{ fontSize: 10 }}>✓</span>
+                    <span className="badge badge-done" style={{ fontSize: 10 }}>
+                      <CheckCircle2 size={12} aria-hidden="true" />
+                    </span>
                   ) : null}
-                  <button className="btn btn-icon btn-sm" onClick={() => setEditCard(card)}>✎</button>
-                  <button className="btn btn-icon btn-sm" onClick={() => setDeletingCard(card)}>🗑</button>
+                  <button className="btn btn-icon btn-sm" title="Edit" aria-label="Edit card" onClick={() => setEditCard(card)}>
+                    <Edit3 size={14} aria-hidden="true" />
+                  </button>
+                  <button className="btn btn-icon btn-sm" title="Delete" aria-label="Delete card" onClick={() => setDeletingCard(card)}>
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
                 </div>
               </div>
             ))}

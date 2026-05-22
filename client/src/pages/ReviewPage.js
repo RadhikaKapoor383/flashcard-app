@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Brain, Frown, PartyPopper, Rocket, Smile, Sparkles } from 'lucide-react';
 import { getDeck, getDueCards, getCards, reviewCard } from '../api';
 import { useToast } from '../hooks/useToast';
 
 const RATINGS = [
-  { quality: 0, label: 'Blackout', emoji: '💀', color: 'rating-0' },
-  { quality: 1, label: 'Hard',     emoji: '😣', color: 'rating-1' },
-  { quality: 3, label: 'Good',     emoji: '😊', color: 'rating-3' },
-  { quality: 5, label: 'Easy',     emoji: '🚀', color: 'rating-4' },
+  { quality: 0, label: 'Blackout', Icon: Brain, color: 'rating-0' },
+  { quality: 1, label: 'Hard', Icon: Frown, color: 'rating-1' },
+  { quality: 3, label: 'Good', Icon: Smile, color: 'rating-3' },
+  { quality: 5, label: 'Easy', Icon: Rocket, color: 'rating-4' },
 ];
 
 function formatNext(days) {
@@ -18,7 +19,6 @@ function formatNext(days) {
 
 export default function ReviewPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const toast = useToast();
 
   const [deck, setDeck] = useState(null);
@@ -35,7 +35,6 @@ export default function ReviewPage() {
         const [deckData, dueCards] = await Promise.all([getDeck(id), getDueCards(id)]);
         setDeck(deckData);
         if (dueCards.length === 0) {
-          // Fall back to all cards if nothing due
           const all = await getCards(id);
           setQueue(all);
         } else {
@@ -54,7 +53,6 @@ export default function ReviewPage() {
     const card = queue[current];
     try {
       await reviewCard(card._id, quality);
-      // Track stats
       setStats(s => ({
         again: s.again + (quality < 3 ? 1 : 0),
         good:  s.good  + (quality === 3 ? 1 : 0),
@@ -77,7 +75,7 @@ export default function ReviewPage() {
   if (queue.length === 0) return (
     <div className="page-container">
       <div className="review-complete">
-        <div className="review-complete-icon">✨</div>
+        <div className="review-complete-icon"><Sparkles size={64} strokeWidth={1.5} aria-hidden="true" /></div>
         <h2>No cards to review!</h2>
         <p>All caught up. Come back later.</p>
         <Link to={`/deck/${id}`} className="btn btn-primary btn-lg" style={{ marginTop: 24, display: 'inline-flex' }}>
@@ -91,7 +89,7 @@ export default function ReviewPage() {
     <div className="page-container">
       <div className="review-container">
         <div className="review-complete">
-          <div className="review-complete-icon">🎉</div>
+          <div className="review-complete-icon"><PartyPopper size={64} strokeWidth={1.5} aria-hidden="true" /></div>
           <h2>Session Complete!</h2>
           <p>You reviewed {queue.length} card{queue.length !== 1 ? 's' : ''}</p>
           <div className="stats-grid">
@@ -122,15 +120,17 @@ export default function ReviewPage() {
   );
 
   const card = queue[current];
-  const progress = ((current) / queue.length) * 100;
+  const progress = (current / queue.length) * 100;
 
   return (
     <main className="page-container">
       <div className="page-content">
         <div className="review-container">
-          <Link to={`/deck/${id}`} className="back-link">← {deck?.name}</Link>
+          <Link to={`/deck/${id}`} className="back-link">
+            <ArrowLeft size={14} aria-hidden="true" />
+            {deck?.name}
+          </Link>
 
-          {/* Progress */}
           <div className="review-progress">
             <span>{current + 1} / {queue.length}</span>
             <div className="review-progress-bar">
@@ -141,7 +141,6 @@ export default function ReviewPage() {
             </span>
           </div>
 
-          {/* Flashcard */}
           <div className="flashcard-flip-wrapper" onClick={() => setFlipped(f => !f)}>
             <div className={`flashcard-flip${flipped ? ' flipped' : ''}`}>
               <div className="flashcard-face">
@@ -156,20 +155,19 @@ export default function ReviewPage() {
             </div>
           </div>
 
-          {/* Rating buttons — only show when flipped */}
           {flipped ? (
             <div>
               <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--cream-dim)', marginBottom: 12 }}>
                 How well did you know this?
               </p>
               <div className="review-rating-grid">
-                {RATINGS.map(r => (
+                {RATINGS.map(({ Icon, ...r }) => (
                   <button
                     key={r.quality}
                     className={`rating-btn ${r.color}`}
                     onClick={() => handleRate(r.quality)}
                   >
-                    <span style={{ fontSize: 20 }}>{r.emoji}</span>
+                    <Icon size={22} aria-hidden="true" />
                     <span className="rating-btn-label">{r.label}</span>
                     <span className="rating-btn-next">
                       {r.quality < 3 ? formatNext(1) : r.quality === 3 ? formatNext(6) : formatNext(Math.max(1, card.interval || 1) * Math.round(card.easeFactor || 2.5))}
